@@ -1,0 +1,251 @@
+use banking_system;
+/*
+show tables;
+
+ select * from account;
+insert into customer(first_name,last_name,dob) values 
+('harry','potter','2002-03-21'),
+('ronald','weasley','2001-02-10'),
+('hermione','granger','2002-11-15');
+
+
+insert into account(account_type,balance,customer_id) values 
+('savings',50000,1) ,
+('current',120000,2) ,
+('zero_balance',100000,3),
+('current',150000,1) ,
+('savings',30000,3);
+
+
+insert into transaction(transaction_type,amount,transaction_date,account_id) 
+values 
+('deposit', 10000, '2024-02-01',1),
+('withdrawal', 5000, '2024-02-02',1),
+('deposit', 20000, '2024-02-02',2),
+('withdrawal', 8000, '2024-02-02',3),
+('transfer', 20000, '2024-02-01',4),
+('transfer', 7000, '2024-02-05',5);
+
+*/
+
+-- Task 2
+
+-- 1. Write a SQL query to retrieve the name, account type and email of all customers.
+select c.* , a.account_type from customer c JOIN account a ON a.customer_id = c.id;
+
+-- 2. Write a SQL query to list all transaction corresponding customer.
+select c.first_name, t.*
+from transaction t 
+	JOIN account a ON a.id = t.account_id
+    JOIN customer c ON c.id = a.customer_id;
+
+-- 3. Write a SQL query to increase the balance of a specific account by a certain amount.
+update account
+set balance = balance + 500 
+where id = 4;
+
+
+-- 4. Write a SQL query to Combine first and last names of customers as a full_name.
+select concat(first_name," ", last_name) as full_name from customer;
+
+
+-- 5. Write a SQL query to remove accounts with a balance of zero where the account 
+-- type is savings.
+delete from account where balance = 0 and account_type = 'saving';
+
+-- 6. Write a SQL query to Find customers living in a specific city.
+
+-- 7. Write a SQL query to Get the account balance for a specific account.
+select * from account where id = '1';
+
+
+-- 8. Write a SQL query to List all current accounts with a balance greater than $1,000.
+select * 
+from account 
+where balance > 1000;
+
+-- 9. Write a SQL query to Retrieve all transactions for a specific account.
+select * 
+from transaction 
+where account_id = 1;
+
+-- 10. Write a SQL query to Calculate the interest accrued on savings accounts based on a  given interest rate.
+
+
+-- 11. Write a SQL query to Identify accounts where the balance is less than a specified overdraft limit.
+
+
+-- 12. Write a SQL query to Find customers not living in a specific city.
+
+
+
+-- ===================================================================================================
+-- Tasks 3: Aggregate functions, Having, Order By, GroupBy and Joins:
+-- 1. Write a SQL query to Find the average account balance for all customers. 
+select c.first_name , avg(balance)
+from customer c
+	JOIN account a ON c.id = a.customer_id
+    group by c.id;
+    
+-- 2. Write a SQL query to Retrieve the top 10 highest account balances.
+select *
+from account a
+order by a.balance desc
+limit 10;
+
+-- 3. Write a SQL query to Calculate Total Deposits for All Customers in specific date.
+select sum(t.amount)
+from transaction t
+where t.transaction_date = '2024-02-02' and t.transaction_type = 'deposit';
+
+
+-- 4. Write a SQL query to Find the Oldest and Newest Customers.
+
+-- 5. Write a SQL query to Retrieve transaction details along with the account type.
+select t.* ,a.account_type
+from transaction t
+	JOIN account a ON a.id = t.account_id;
+
+-- 6. Write a SQL query to Get a list of customers along with their account details.
+select * from customer c
+JOIN account a ON a.customer_id = c.id;
+
+
+-- 7. Write a SQL query to Retrieve transaction details along with customer information for a specific account.
+select *
+from transaction t 
+	JOIN account a ON t.account_id = a.id
+	JOIN customer c ON a.customer_id = c.id;
+    
+-- 8. Write a SQL query to Identify customers who have more than one account.
+select * 
+from customer c
+	JOIN account a ON a.customer_id = c.id
+    group by c.id
+    having count(a.id)>1;
+	
+-- 9. Write a SQL query to Calculate the difference in transaction amounts between deposits and withdrawals.
+
+-- 10. Write a SQL query to Calculate the average daily balance for each account over a specified period.
+
+-- 11. Calculate the total balance for each account type.
+select a.account_type , sum(a.balance) as Total_Balance
+from account a
+group by a.account_type;
+
+
+-- 12. Identify accounts with the highest number of transactions order by descending order.
+select a.* , count(a.id) as no_of_transaction
+from transaction t 
+	JOIN account a ON a.id = t.account_id
+    group by a.id
+    order by no_of_transaction desc;
+
+-- 13. List customers with high aggregate account balances, along with their account types.
+
+-- 14. Identify and list duplicate transactions based on transaction amount, date, and account
+
+
+
+-- Task 4: : Subquery and its type:
+-- 1. Retrieve the customer(s) with the highest account balance.
+select c.*, a.balance
+from customer c 
+	JOIN account a on c.id = a.customer_id
+	order by a.balance desc
+	limit 1;
+
+-- 2. Calculate the average account balance for customers who have more than one account.
+select * 
+from customer c
+	JOIN account a ON a.customer_id = c.id
+    group by a.id;
+-- 3. Retrieve accounts with transactions whose amounts exceed the average transaction amount.
+ 
+-- 4. Identify customers who have no recorded transactions.
+
+SELECT DISTINCT a.*
+FROM account a
+JOIN transaction t ON a.id = t.account_id
+WHERE t.amount > (SELECT AVG(amount) FROM transaction);
+
+
+-- 5. Calculate the total balance of accounts with no recorded transactions.
+
+SELECT c.*
+FROM customer c
+LEFT JOIN account a ON c.id = a.customer_id
+LEFT JOIN transaction t ON a.id = t.account_id
+WHERE t.id IS NULL;
+
+
+
+-- 6. Retrieve transactions for accounts with the lowest balance.
+
+SELECT t.*
+FROM transaction t
+JOIN (
+    SELECT account_id, MIN(balance) AS min_balance
+    FROM account
+    GROUP BY account_id
+) AS min_balances ON t.account_id = min_balances.account_id;
+
+
+
+-- 7. Identify customers who have accounts of multiple types.
+
+SELECT c.*
+FROM customer c
+JOIN account a ON c.id = a.customer_id
+GROUP BY c.id
+HAVING COUNT(DISTINCT a.account_type) > 1;
+
+/*
+1	harry	potter	2002-03-21
+3	hermione	granger	2002-11-15
+*/
+
+-- 8. Calculate the percentage of each account type out of the total number of accounts.
+
+      SELECT account_type, 
+       COUNT(*) AS num_accounts,
+       (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM account)) AS percentage
+FROM account
+GROUP BY account_type;
+
+/*
+current	2	40.00000
+savings	2	40.00000
+zero_balance	1	20.00000
+*/
+
+-- 9. Retrieve all transactions for a customer with a given customer_id.
+
+SELECT t.*
+FROM transaction t
+JOIN account a ON t.account_id = a.id
+WHERE a.customer_id = customer_id;
+
+/*
+1	deposit	2024-02-01	10000	1
+2	withdrawal	2024-02-02	5000	1
+5	transfer	2024-02-01	20000	4
+3	deposit	2024-02-02	20000	2
+4	withdrawal	2024-02-02	8000	3
+6	transfer	2024-02-05	7000	5
+*/
+
+-- 10. Calculate the total balance for each account type, including a subquery within the SELECT  clause.
+  
+  SELECT account_type,
+       SUM(balance) AS total_balance,
+       (SELECT SUM(balance) FROM account) AS overall_total_balance
+FROM account
+GROUP BY account_type;
+
+
+/*
+current	270500	450500
+savings	80000	450500
+zero_balance	100000	450500
+*/
